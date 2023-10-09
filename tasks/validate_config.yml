@@ -1,0 +1,42 @@
+---
+
+- name: Fail if required echoip settings not defined
+  ansible.builtin.fail:
+    msg: >
+      You need to define a required configuration setting (`{{ item }}`).
+  when: "vars[item] == ''"
+  with_items:
+    - echoip_identifier
+    - echoip_uid
+    - echoip_gid
+    - echoip_hostname
+    - echoip_path_prefix
+    - echoip_container_network
+
+- name: Fail if echoip hosted at a subpath
+  ansible.builtin.fail:
+    msg: >
+      echoip can only be hosted at the base path (`/`), not at a subpath like `{{ echoip_path_prefix }}`).
+  when: "echoip_path_prefix != '/'"
+
+- name: Validate echoip Traefik settings
+  when: echoip_container_labels_traefik_enabled | bool
+  block:
+    - name: Fail if required echoip Traefik settings not defined
+      ansible.builtin.fail:
+        msg: >-
+          You need to define a required configuration setting (`{{ item }}`).
+      when: "vars[item] == ''"
+      with_items:
+        - echoip_container_labels_traefik_hostname
+        - echoip_container_labels_traefik_path_prefix
+
+    # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
+    # Knowing that `echoip_container_labels_traefik_path_prefix` does not end with a slash
+    # ensures we know how to set these routes up without having to do "does it end with a slash" checks elsewhere.
+    - name: Fail if echoip_container_labels_traefik_path_prefix ends with a slash
+      ansible.builtin.fail:
+        msg: >-
+          echoip_container_labels_traefik_path_prefix (`{{ echoip_container_labels_traefik_path_prefix }}`)
+          must either be `/` or not end with a slash (e.g. `/ip`).
+      when: "echoip_container_labels_traefik_path_prefix != '/' and echoip_container_labels_traefik_path_prefix[-1] == '/'"

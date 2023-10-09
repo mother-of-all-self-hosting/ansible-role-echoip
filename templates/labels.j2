@@ -1,0 +1,45 @@
+{% if echoip_container_labels_traefik_enabled %}
+traefik.enable=true
+
+{% if echoip_container_labels_traefik_docker_network %}
+traefik.docker.network={{ echoip_container_labels_traefik_docker_network }}
+{% endif %}
+
+{% set middlewares = [] %}
+
+{% if echoip_container_labels_traefik_path_prefix != '/' %}
+traefik.http.middlewares.{{ echoip_identifier }}-slashless-redirect.redirectregex.regex=({{ echoip_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ echoip_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
+{% set middlewares = middlewares + [echoip_identifier + '-slashless-redirect'] %}
+{% endif %}
+
+{% if echoip_container_labels_traefik_path_prefix != '/' %}
+traefik.http.middlewares.{{ echoip_identifier }}-strip-prefix.stripprefix.prefixes={{ echoip_container_labels_traefik_path_prefix }}
+{% set middlewares = middlewares + [echoip_identifier + '-strip-prefix'] %}
+{% endif %}
+
+{% if echoip_container_labels_traefik_additional_response_headers.keys() | length > 0 %}
+{% for name, value in echoip_container_labels_traefik_additional_response_headers.items() %}
+traefik.http.middlewares.{{ echoip_identifier }}-add-response-headers.headers.customresponseheaders.{{ name }}={{ value }}
+{% endfor %}
+{% set middlewares = middlewares + [echoip_identifier + '-add-response-headers'] %}
+{% endif %}
+
+traefik.http.routers.{{ echoip_identifier }}.rule={{ echoip_container_labels_traefik_rule }}
+{% if echoip_container_labels_traefik_priority | int > 0 %}
+traefik.http.routers.{{ echoip_identifier }}.priority={{ echoip_container_labels_traefik_priority }}
+{% endif %}
+traefik.http.routers.{{ echoip_identifier }}.service={{ echoip_identifier }}
+{% if middlewares | length > 0 %}
+traefik.http.routers.{{ echoip_identifier }}.middlewares={{ middlewares | join(',') }}
+{% endif %}
+traefik.http.routers.{{ echoip_identifier }}.entrypoints={{ echoip_container_labels_traefik_entrypoints }}
+traefik.http.routers.{{ echoip_identifier }}.tls={{ echoip_container_labels_traefik_tls | to_json }}
+{% if echoip_container_labels_traefik_tls %}
+traefik.http.routers.{{ echoip_identifier }}.tls.certResolver={{ echoip_container_labels_traefik_tls_certResolver }}
+{% endif %}
+
+traefik.http.services.{{ echoip_identifier }}.loadbalancer.server.port=8080
+{% endif %}
+
+{{ echoip_container_labels_additional_labels }}

@@ -1,0 +1,26 @@
+---
+
+- name: Perform echoip installation tasks
+  tags:
+    - setup-all
+    - setup-echoip
+    - install-all
+    - install-echoip
+  block:
+    - name: Validate echoip configuration
+      when: echoip_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+
+    - name: Install echoip
+      when: echoip_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
+
+
+- name: Perform echoip uninstallation tasks
+  tags:
+    - setup-all
+    - setup-echoip
+  block:
+    - name: Uninstall echoip
+      when: not echoip_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"

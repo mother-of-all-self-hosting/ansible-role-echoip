@@ -1,0 +1,45 @@
+#jinja2: lstrip_blocks: "True"
+[Unit]
+Description=echoip ({{ echoip_identifier }})
+{% for service in echoip_systemd_required_services_list %}
+Requires={{ service }}
+After={{ service }}
+{% endfor %}
+DefaultDependencies=no
+
+[Service]
+Type=simple
+Environment="HOME={{ devture_systemd_docker_base_systemd_unit_home_path }}"
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ echoip_identifier }} 2>/dev/null || true'
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ echoip_identifier }} 2>/dev/null || true'
+
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
+			--rm \
+			--name={{ echoip_identifier }} \
+			--log-driver=none \
+			--user={{ echoip_uid }}:{{ echoip_gid }} \
+			--cap-drop=ALL \
+			--network={{ echoip_container_network }} \
+			--label-file={{ echoip_base_path }}/labels \
+			--mount type=bind,src={{ echoip_data_path }},dst=/app/data \
+			{% for arg in echoip_container_extra_arguments %}
+			{{ arg }} \
+			{% endfor %}
+			{{ echoip_container_image }} \
+			-H X-Real-IP
+
+{% for network in echoip_container_additional_networks %}
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ echoip_identifier }}
+{% endfor %}
+
+ExecStart={{ devture_systemd_docker_base_host_command_docker }} start --attach {{ echoip_identifier }}
+
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ echoip_identifier }} 2>/dev/null || true'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ echoip_identifier }} 2>/dev/null || true'
+
+Restart=always
+RestartSec=30
+SyslogIdentifier={{ echoip_identifier }}
+
+[Install]
+WantedBy=multi-user.target

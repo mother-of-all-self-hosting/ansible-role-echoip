@@ -1,0 +1,40 @@
+---
+
+- name: Ensure echoip paths exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+    owner: "{{ echoip_uid }}"
+    group: "{{ echoip_gid }}"
+  with_items:
+    - "{{ echoip_base_path }}"
+    - "{{ echoip_data_path }}"
+
+- name: Ensure echoip support files installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ echoip_base_path }}/{{ item }}"
+    mode: "0640"
+    owner: "{{ echoip_uid }}"
+    group: "{{ echoip_gid }}"
+  with_items:
+    - labels
+
+- name: Ensure echoip container image is pulled
+  community.docker.docker_image:
+    name: "{{ echoip_container_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+    force_source: "{{ echoip_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else echoip_container_image_force_pull }}"
+
+- name: Ensure echoip container network is created
+  community.general.docker_network:
+    name: "{{ echoip_container_network }}"
+    driver: bridge
+
+- name: Ensure echoip systemd service is present
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/systemd/echoip.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ echoip_identifier }}.service"
+    mode: "0644"

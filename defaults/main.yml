@@ -1,0 +1,144 @@
+---
+
+# Project source code URL: https://github.com/mpolden/echoip
+
+echoip_enabled: true
+
+echoip_identifier: echoip
+
+echoip_uid: ''
+echoip_gid: ''
+
+echoip_version: latest
+
+# The hostname at which echoip is served.
+echoip_hostname: ''
+
+# The path at which echoip is served.
+# This value must either be `/` or not end with a slash (e.g. `/ip`).
+#
+# Hosting under a subpath is not possible yet due to echoip limitations.
+echoip_path_prefix: /
+
+echoip_base_path: "/{{ echoip_identifier }}"
+echoip_data_path: "{{ echoip_base_path }}/data"
+
+echoip_container_image: "{{ echoip_container_image_registry_prefix }}mpolden/echoip:{{ echoip_container_image_tag }}"
+echoip_container_image_registry_prefix: docker.io/
+echoip_container_image_tag: "{{ echoip_version }}"
+echoip_container_image_force_pull: "{{ echoip_container_image.endswith(':latest') }}"
+
+# The base container network. It will be auto-created by this role if it doesn't exist already.
+echoip_container_network: "{{ echoip_identifier }}"
+
+# A list of additional container networks that the container would be connected to.
+# The role does not create these networks, so make sure they already exist.
+# Use this to expose this container to another reverse proxy, which runs in a different container network.
+echoip_container_additional_networks: []
+
+# echoip_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
+# See `../templates/labels.j2` for details.
+#
+# To inject your own other container labels, see `echoip_container_labels_additional_labels`.
+echoip_container_labels_traefik_enabled: true
+echoip_container_labels_traefik_docker_network: "{{ echoip_container_network }}"
+echoip_container_labels_traefik_hostname: "{{ echoip_hostname }}"
+# The path prefix must either be `/` or not end with a slash (e.g. `/ip`).
+echoip_container_labels_traefik_path_prefix: "{{ echoip_path_prefix }}"
+echoip_container_labels_traefik_rule: "Host(`{{ echoip_container_labels_traefik_hostname }}`){% if echoip_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ echoip_container_labels_traefik_path_prefix }}`){% endif %}"  # noqa yaml[line-length]
+echoip_container_labels_traefik_priority: 0
+echoip_container_labels_traefik_entrypoints: web-secure
+echoip_container_labels_traefik_tls: "{{ echoip_container_labels_traefik_entrypoints != 'web' }}"
+echoip_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+
+# Controls which additional headers to attach to all HTTP responses.
+# To add your own custom response headers, use `echoip_container_labels_traefik_additional_response_headers_custom`
+echoip_container_labels_traefik_additional_response_headers: "{{ echoip_container_labels_traefik_additional_response_headers_auto | combine(echoip_container_labels_traefik_additional_response_headers_custom) }}"  # noqa yaml[line-length]
+echoip_container_labels_traefik_additional_response_headers_auto: |
+  {{
+    {}
+    | combine ({'X-XSS-Protection': echoip_http_header_xss_protection} if echoip_http_header_xss_protection else {})
+    | combine ({'X-Frame-Options': echoip_http_header_frame_options} if echoip_http_header_frame_options else {})
+    | combine ({'X-Content-Type-Options': echoip_http_header_content_type_options} if echoip_http_header_content_type_options else {})
+    | combine ({'Content-Security-Policy': echoip_http_header_content_security_policy} if echoip_http_header_content_security_policy else {})
+    | combine ({'Permission-Policy': echoip_http_header_content_permission_policy} if echoip_http_header_content_permission_policy else {})
+    | combine ({'Strict-Transport-Security': echoip_http_header_strict_transport_security} if echoip_http_header_strict_transport_security and echoip_container_labels_traefik_tls else {})
+  }}
+echoip_container_labels_traefik_additional_response_headers_custom: {}
+
+# echoip_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
+# See `../templates/labels.j2` for details.
+#
+# Example:
+# echoip_container_labels_additional_labels: |
+#   my.label=1
+#   another.label="here"
+echoip_container_labels_additional_labels: ''
+
+# Specifies how often the container health-check will run.
+#
+# For Traefik based setups, it's important that the interval is short,
+# because the interval value also specifies the "initial wait time".
+# This is a Docker (moby) bug: https://github.com/moby/moby/issues/33410
+# Without a successful healthcheck, Traefik will not register the service for reverse-proxying.
+# Thus, the health interval determines the initial start-up time -- the smaller, the better.
+#
+# For non-Traefik setups, we use the default healthcheck interval (60s) to decrease overhead.
+echoip_container_health_interval: "{{ '5s' if echoip_container_labels_traefik_enabled else '60s' }}"
+
+# A list of extra arguments to pass to the container
+echoip_container_extra_arguments: []
+
+# Specifies the value of the `X-XSS-Protection` header
+# Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
+#
+# Learn more about it is here:
+# - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+# - https://portswigger.net/web-security/cross-site-scripting/reflected
+echoip_http_header_xss_protection: "1; mode=block"
+
+# Specifies the value of the `X-Frame-Options` header which controls whether framing can happen.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+echoip_http_header_frame_options: SAMEORIGIN
+
+# Specifies the value of the `X-Content-Type-Options` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+echoip_http_header_content_type_options: nosniff
+
+# Specifies the value of the `Content-Security-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+echoip_http_header_content_security_policy: frame-ancestors 'self'
+
+# Specifies the value of the `Permission-Policy` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permission-Policy
+echoip_http_header_content_permission_policy: "{{ 'interest-cohort=()' if echoip_floc_optout_enabled else '' }}"
+
+# Specifies the value of the `Strict-Transport-Security` header.
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+echoip_http_header_strict_transport_security: "max-age=31536000; includeSubDomains{{ '; preload' if echoip_hsts_preload_enabled else '' }}"
+
+# Controls whether to send a "Permissions-Policy interest-cohort=();" header along with all responses
+#
+# Learn more about what it is here:
+# - https://www.eff.org/deeplinks/2021/03/googles-floc-terrible-idea
+# - https://paramdeo.com/blog/opting-your-website-out-of-googles-floc-network
+# - https://amifloced.org/
+#
+# Of course, a better solution is to just stop using browsers (like Chrome), which participate in such tracking practices.
+# See: `echoip_content_permission_policy`
+echoip_floc_optout_enabled: true
+
+# Controls if HSTS preloading is enabled
+#
+# In its strongest and recommended form, the [HSTS policy](https://www.chromium.org/hsts) includes all subdomains, and
+# indicates a willingness to be "preloaded" into browsers:
+# `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+# For more information visit:
+# - https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security
+# - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+# - https://hstspreload.org/#opt-in
+# See: `echoip_http_header_strict_transport_security`
+echoip_hsts_preload_enabled: false
+
+# List of systemd services that kuma.service depends on
+echoip_systemd_required_services_list: ['docker.service']

@@ -1,0 +1,20 @@
+---
+- name: Check existence of echoip systemd service
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ echoip_identifier }}.service"
+  register: echoip_service_stat
+
+- name: Stop and uninstall echoip systemd service
+  when: echoip_service_stat.stat.exists | bool
+  block:
+    - name: Ensure echoip systemd service is stopped
+      ansible.builtin.service:
+        name: "{{ echoip_identifier }}"
+        state: stopped
+        enabled: false
+        daemon_reload: true
+
+    - name: Ensure echoip systemd service does not exist
+      ansible.builtin.file:
+        path: "{{ devture_systemd_docker_base_systemd_path }}/{{ echoip_identifier }}.service"
+        state: absent
