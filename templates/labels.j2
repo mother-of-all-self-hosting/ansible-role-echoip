@@ -45,7 +45,7 @@ traefik.http.routers.{{ echoip_identifier }}.tls={{ echoip_container_labels_trae
 traefik.http.routers.{{ echoip_identifier }}.tls.certResolver={{ echoip_container_labels_traefik_tls_certResolver }}
 {% endif %}
 
-traefik.http.services.{{ echoip_identifier }}.loadbalancer.server.port=8080
+traefik.http.services.{{ echoip_identifier }}.loadbalancer.server.port={{ echoip_container_http_port }}
 {% endif %}
 
 {{ echoip_container_labels_additional_labels }}
