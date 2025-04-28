@@ -24,22 +24,22 @@ ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_s
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ echoip_identifier }} 2>/dev/null || true'
 
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-			--rm \
-			--name={{ echoip_identifier }} \
-			--log-driver=none \
-			--user={{ echoip_uid }}:{{ echoip_gid }} \
-			--cap-drop=ALL \
-			--network={{ echoip_container_network }} \
-			{% if echoip_container_http_host_bind_port %}
-			-p {{ echoip_container_http_host_bind_port }}:{{ echoip_container_http_port }} \
-			{% endif %}
-			--label-file={{ echoip_base_path }}/labels \
-			--mount type=bind,src={{ echoip_data_path }},dst=/app/data \
-			{% for arg in echoip_container_extra_arguments %}
-			{{ arg }} \
-			{% endfor %}
-			{{ echoip_container_image }} \
-			-H X-Real-IP
+      --rm \
+      --name={{ echoip_identifier }} \
+      --log-driver=none \
+      --user={{ echoip_uid }}:{{ echoip_gid }} \
+      --cap-drop=ALL \
+      --network={{ echoip_container_network }} \
+      {% if echoip_container_http_host_bind_port %}
+      -p {{ echoip_container_http_host_bind_port }}:{{ echoip_container_http_port }} \
+      {% endif %}
+      --label-file={{ echoip_base_path }}/labels \
+      --mount type=bind,src={{ echoip_data_path }},dst=/app/data \
+      {% for arg in echoip_container_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
+      {{ echoip_container_image }} \
+      -H X-Real-IP
 
 {% for network in echoip_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ echoip_identifier }}
