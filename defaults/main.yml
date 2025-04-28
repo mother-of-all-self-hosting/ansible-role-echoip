@@ -12,11 +12,13 @@
 echoip_enabled: true
 
 echoip_identifier: echoip
+echoip_base_path: "/{{ echoip_identifier }}"
+echoip_data_path: "{{ echoip_base_path }}/data"
+
+echoip_version: latest
 
 echoip_uid: ''
 echoip_gid: ''
-
-echoip_version: latest
 
 # The hostname at which echoip is served.
 echoip_hostname: ''
@@ -26,9 +28,6 @@ echoip_hostname: ''
 #
 # Hosting under a subpath is not possible yet due to echoip limitations.
 echoip_path_prefix: /
-
-echoip_base_path: "/{{ echoip_identifier }}"
-echoip_data_path: "{{ echoip_base_path }}/data"
 
 echoip_container_image: "{{ echoip_container_image_registry_prefix }}mpolden/echoip:{{ echoip_container_image_tag }}"
 echoip_container_image_tag: "{{ echoip_version }}"
