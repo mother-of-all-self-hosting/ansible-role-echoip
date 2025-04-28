@@ -145,5 +145,8 @@ echoip_floc_optout_enabled: true
 # See: `echoip_http_header_strict_transport_security`
 echoip_hsts_preload_enabled: false
 
-# List of systemd services that kuma.service depends on
-echoip_systemd_required_services_list: ['docker.service']
+# List of systemd services that the echoip systemd service depends on
+echoip_systemd_required_services_list: "{{ echoip_systemd_required_services_list_default + echoip_systemd_required_services_list_auto + echoip_systemd_required_services_list_custom }}"
+echoip_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
+echoip_systemd_required_services_list_auto: []
+echoip_systemd_required_services_list_custom: []
