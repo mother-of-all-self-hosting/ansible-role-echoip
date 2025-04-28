@@ -152,3 +152,6 @@ echoip_systemd_required_services_list: "{{ echoip_systemd_required_services_list
 echoip_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
 echoip_systemd_required_services_list_auto: []
 echoip_systemd_required_services_list_custom: []
+
+# List of systemd services that the echoip systemd service wants
+echoip_systemd_wanted_services_list: []
