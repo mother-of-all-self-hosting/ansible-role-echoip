@@ -5,7 +5,6 @@ SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
 
-#jinja2: lstrip_blocks: "True"
 [Unit]
 Description=echoip ({{ echoip_identifier }})
 {% for service in echoip_systemd_required_services_list %}
