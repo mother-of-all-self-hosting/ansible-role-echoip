@@ -19,7 +19,6 @@
       when: echoip_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-
 - name: Perform echoip uninstallation tasks
   tags:
     - setup-all
