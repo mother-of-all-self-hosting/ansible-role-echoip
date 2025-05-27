@@ -4,13 +4,12 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Check existence of echoip systemd service
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ echoip_identifier }}.service"
   register: echoip_service_stat
 
-- name: Stop and uninstall echoip systemd service
+- name: Uninstall echoip systemd services and files
   when: echoip_service_stat.stat.exists | bool
   block:
     - name: Ensure echoip systemd service is stopped
