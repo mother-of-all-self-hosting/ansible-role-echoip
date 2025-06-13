@@ -56,21 +56,21 @@
   block:
     - name: Ensure echoip repository is present on self-build
       ansible.builtin.git:
-        repo: "{{ echoip_container_repo }}"
-        version: "{{ echoip_container_repo_version }}"
-        dest: "{{ echoip_container_src_files_path }}"
+        repo: "{{ echoip_container_image_self_build_repo }}"
+        version: "{{ echoip_container_image_self_build_repo_version }}"
+        dest: "{{ echoip_container_image_self_build_src_files_path }}"
         force: "yes"
       register: echoip_git_pull_results
 
     - name: Ensure echoip container image is built
       community.docker.docker_image:
-        name: "{{ echoip_container_image_name }}"
+        name: "{{ echoip_container_image_self_build_name }}"
         source: build
         force_source: "{{ echoip_git_pull_results.changed if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
         force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else echoip_git_pull_results.changed }}"
         build:
           dockerfile: Dockerfile
-          path: "{{ echoip_container_src_files_path }}"
+          path: "{{ echoip_container_image_self_build_src_files_path }}"
           pull: true
           args:
 
