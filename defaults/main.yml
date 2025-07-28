@@ -75,6 +75,12 @@ echoip_container_labels_traefik_entrypoints: web-secure
 echoip_container_labels_traefik_tls: "{{ echoip_container_labels_traefik_entrypoints != 'web' }}"
 echoip_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 
+# Controls which additional headers to attach to all HTTP requests.
+# To add your own custom request headers, use `echoip_container_labels_traefik_additional_response_headers_custom`
+echoip_container_labels_traefik_additional_request_headers: "{{ echoip_container_labels_traefik_additional_request_headers_auto | combine(echoip_container_labels_traefik_additional_request_headers_custom) }}"
+echoip_container_labels_traefik_additional_request_headers_auto: {}
+echoip_container_labels_traefik_additional_request_headers_custom: {}
+
 # Controls which additional headers to attach to all HTTP responses.
 # To add your own custom response headers, use `echoip_container_labels_traefik_additional_response_headers_custom`
 echoip_container_labels_traefik_additional_response_headers: "{{ echoip_container_labels_traefik_additional_response_headers_auto | combine(echoip_container_labels_traefik_additional_response_headers_custom) }}"  # noqa yaml[line-length]

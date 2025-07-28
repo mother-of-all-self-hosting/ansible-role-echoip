@@ -24,6 +24,13 @@ traefik.http.middlewares.{{ echoip_identifier }}-strip-prefix.stripprefix.prefix
 {% set middlewares = middlewares + [echoip_identifier + '-strip-prefix'] %}
 {% endif %}
 
+{% if echoip_container_labels_traefik_additional_request_headers.keys() | length > 0 %}
+{% for name, value in echoip_container_labels_traefik_additional_request_headers.items() %}
+traefik.http.middlewares.{{ echoip_identifier }}-add-request-headers.headers.customrequestheaders.{{ name }}={{ value }}
+{% endfor %}
+{% set middlewares = middlewares + [echoip_identifier + '-add-request-headers'] %}
+{% endif %}
+
 {% if echoip_container_labels_traefik_additional_response_headers.keys() | length > 0 %}
 {% for name, value in echoip_container_labels_traefik_additional_response_headers.items() %}
 traefik.http.middlewares.{{ echoip_identifier }}-add-response-headers.headers.customresponseheaders.{{ name }}={{ value }}
