@@ -14,7 +14,7 @@ traefik.docker.network={{ echoip_container_labels_traefik_docker_network }}
 {% set middlewares = [] %}
 
 {% if echoip_container_labels_traefik_path_prefix != '/' %}
-traefik.http.middlewares.{{ echoip_identifier }}-slashless-redirect.redirectregex.regex=({{ echoip_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ echoip_identifier }}-slashless-redirect.redirectregex.regex=^({{ echoip_container_labels_traefik_path_prefix | quote }})$
 traefik.http.middlewares.{{ echoip_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
 {% set middlewares = middlewares + [echoip_identifier + '-slashless-redirect'] %}
 {% endif %}
