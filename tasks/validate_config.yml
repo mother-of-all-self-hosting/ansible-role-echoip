@@ -16,12 +16,6 @@
     - echoip_path_prefix
     - echoip_container_network
 
-- name: Fail if echoip hosted at a subpath
-  ansible.builtin.fail:
-    msg: >-
-      echoip can only be hosted at the base path (`/`), not at a subpath like `{{ echoip_path_prefix }}`).
-  when: "echoip_path_prefix != '/'"
-
 - name: Validate echoip Traefik settings
   when: echoip_container_labels_traefik_enabled | bool
   block:
@@ -33,6 +27,13 @@
       with_items:
         - echoip_container_labels_traefik_hostname
         - echoip_container_labels_traefik_path_prefix
+
+    - name: Fail if echoip_container_labels_traefik_path_prefix is different than /
+      ansible.builtin.fail:
+        msg: >-
+          echoip_container_labels_traefik_path_prefix (`{{ echoip_container_labels_traefik_path_prefix }}`) must be `/`.
+          echoip does not support hosting under a subpath yet.
+      when: "echoip_container_labels_traefik_path_prefix != '/'"
 
     # We ensure it doesn't end with a slash, because we handle both (slash and no-slash).
     # Knowing that `echoip_container_labels_traefik_path_prefix` does not end with a slash
