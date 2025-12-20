@@ -102,7 +102,9 @@ echoip_container_labels_traefik_additional_response_headers_custom: {}
 # echoip_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-echoip_container_labels_additional_labels: ''
+echoip_container_labels_additional_labels: "{{ echoip_container_labels_additional_labels_auto | combine(echoip_container_labels_additional_labels_custom) }}"
+echoip_container_labels_additional_labels_auto: {}
+echoip_container_labels_additional_labels_custom: {}
 
 # Specifies how often the container health-check will run.
 #
