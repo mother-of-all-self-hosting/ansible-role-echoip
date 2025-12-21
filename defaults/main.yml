@@ -17,11 +17,11 @@ echoip_data_path: "{{ echoip_base_path }}/data"
 
 echoip_version: latest
 
-echoip_uid: ''
-echoip_gid: ''
+echoip_uid: ""
+echoip_gid: ""
 
 # The hostname at which echoip is served.
-echoip_hostname: ''
+echoip_hostname: ""
 
 # The path at which echoip is served.
 # This value must either be `/` or not end with a slash (e.g. `/ip`).
@@ -45,7 +45,7 @@ echoip_container_image_self_build_src_files_path: "{{ echoip_base_path }}/docker
 # Controls whether the container exposes its HTTP port (tcp/8080 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:9000"), or empty string to not expose.
-echoip_container_http_host_bind_port: ''
+echoip_container_http_host_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 echoip_container_network: "{{ echoip_identifier }}"
