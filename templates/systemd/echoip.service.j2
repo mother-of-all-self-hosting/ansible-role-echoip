@@ -1,6 +1,7 @@
 {#
 SPDX-FileCopyrightText: 2023 Nikita Chernyi
 SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+SPDX-FileCopyrightText: 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -32,6 +33,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% if echoip_container_http_host_bind_port %}
       -p {{ echoip_container_http_host_bind_port }}:{{ echoip_container_http_port }} \
       {% endif %}
+      --env-file={{ echoip_base_path }}/env \
       --label-file={{ echoip_base_path }}/labels \
       --mount type=bind,src={{ echoip_data_path }},dst=/app/data \
       {% for arg in echoip_container_extra_arguments %}
