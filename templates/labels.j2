@@ -55,4 +55,6 @@ traefik.http.routers.{{ echoip_identifier }}.tls.certResolver={{ echoip_containe
 traefik.http.services.{{ echoip_identifier }}.loadbalancer.server.port={{ echoip_container_http_port }}
 {% endif %}
 
-{{ echoip_container_labels_additional_labels }}
+{% for arg in echoip_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}
