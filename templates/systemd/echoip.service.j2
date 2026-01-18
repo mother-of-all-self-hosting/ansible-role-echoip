@@ -29,6 +29,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       --log-driver=none \
       --user={{ echoip_uid }}:{{ echoip_gid }} \
       --cap-drop=ALL \
+      --read-only \
       --network={{ echoip_container_network }} \
       {% if echoip_container_http_host_bind_port %}
       -p {{ echoip_container_http_host_bind_port }}:{{ echoip_container_http_port }} \
