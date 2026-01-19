@@ -26,7 +26,8 @@ echoip_hostname: ""
 # The path at which echoip is served.
 # This value must either be `/` or not end with a slash (e.g. `/ip`).
 #
-# Hosting under a subpath is not possible yet due to echoip limitations.
+# Hosting echoip under a subpath does not seem to be possible due to echoip's
+# technical limitations.
 echoip_path_prefix: /
 
 echoip_container_image: "{{ echoip_container_image_registry_prefix }}mpolden/echoip:{{ echoip_container_image_tag }}"
