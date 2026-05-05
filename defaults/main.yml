@@ -35,7 +35,6 @@ echoip_container_image_tag: "{{ echoip_version }}"
 echoip_container_image_registry_prefix: "{{ echoip_container_image_registry_prefix_upstream }}"
 echoip_container_image_registry_prefix_upstream: "{{ echoip_container_image_registry_prefix_upstream_default }}"
 echoip_container_image_registry_prefix_upstream_default: docker.io/
-echoip_container_image_force_pull: "{{ echoip_container_image.endswith(':latest') }}"
 
 echoip_container_image_self_build: false
 echoip_container_image_self_build_name: "mpolden/echoip:{{ echoip_container_image_tag }}"
