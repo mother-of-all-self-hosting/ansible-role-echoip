@@ -17,27 +17,27 @@
 - name: Fail if required echoip settings not defined
   ansible.builtin.fail:
     msg: >-
-      You need to define a required configuration setting (`{{ item.name }}`).
-  when: "item.when | bool and lookup('vars', item.name, default='') | string | length == 0"
+      You need to define a required configuration setting (`{{ item }}`).
+  when: "lookup('vars', item, default='') | string | length == 0"
   with_items:
-    - { "name": "echoip_uid", when: true }
-    - { "name": "echoip_gid", when: true }
-    - { "name": "echoip_hostname", when: true }
-    - { "name": "echoip_path_prefix", when: true }
-    - { "name": "echoip_container_network", when: true }
-    - { "name": "echoip_container_labels_traefik_middleware_basic_auth_users", when: "{{ echoip_container_labels_traefik_middleware_basic_auth_enabled }}" }
+    - echoip_uid
+    - echoip_gid
+    - echoip_hostname
+    - echoip_path_prefix
+    - echoip_container_network
 
-- name: Validate echoip Traefik settings
+- name: Run if Traefik is enabled
   when: echoip_container_labels_traefik_enabled | bool
   block:
     - name: Fail if Traefik settings required for echoip are not defined
       ansible.builtin.fail:
         msg: >-
-          You need to define a required configuration setting (`{{ item }}`).
-      when: "lookup('vars', item, default='') | string | length == 0"
+          You need to define a required configuration setting (`{{ item.name }}`).
+      when: "item.when | bool and lookup('vars', item.name, default='') | string | length == 0"
       with_items:
-        - echoip_container_labels_traefik_hostname
-        - echoip_container_labels_traefik_path_prefix
+        - { "name": "echoip_container_labels_traefik_hostname", when: true }
+        - { "name": "echoip_container_labels_traefik_path_prefix", when: true }
+        - { "name": "echoip_container_labels_traefik_middleware_basic_auth_users", when: "{{ echoip_container_labels_traefik_middleware_basic_auth_enabled }}" }
 
     - name: Fail if echoip_container_labels_traefik_path_prefix is different than /
       ansible.builtin.fail:
