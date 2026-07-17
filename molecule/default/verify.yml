@@ -23,6 +23,12 @@
         fail_msg: "echoip.service not active ({{ echoip_service.status.ActiveState }})"
         success_msg: "echoip.service is active"
 
+    - name: Retrieve echoip service log for debugging
+      when: echoip_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu echoip.service
+      changed_when: false
+
     - name: Wait for echoip HTTP endpoint to respond (up to 10m)
       ansible.builtin.uri:
         url: "http://localhost:8080/"
