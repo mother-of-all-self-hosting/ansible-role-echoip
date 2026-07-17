@@ -33,7 +33,7 @@ provisioner:
         # Variables for echoip
         echoip_uid: 1000
         echoip_gid: 1000
-        echoip_hostname: echoip
+        echoip_hostname: localhost
         echoip_container_labels_traefik_enabled: false
         echoip_container_http_host_bind_port: 8080
   env:
