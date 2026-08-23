@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2023, 2024 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023-2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023-2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
 # SPDX-FileCopyrightText: 2025 MASH project contributors
 # SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
@@ -15,6 +15,20 @@ echoip_identifier: echoip
 echoip_base_path: "/{{ echoip_identifier }}"
 echoip_data_path: "{{ echoip_base_path }}/data"
 
+# `latest` is not a choice made here over some pinned alternative - it is the
+# only tag that exists. docker.io/mpolden/echoip carries exactly one tag,
+# rebuilt in place, and github.com/mpolden/echoip publishes no releases and no
+# git tags at all.
+#
+# So there is deliberately no `# renovate:` annotation on this variable and
+# nothing for Renovate to bump: there is no ordering for it to follow and no
+# newer value for it to offer. For the same reason this role does not extend
+# the `patch-automerge` Renovate preset that most of the fleet does - echoip
+# has no patch releases to automerge.
+#
+# It is also why this role's own tags are named `v0.0.0-<release>`: with no
+# upstream version to name a release after, the tags encode its absence and
+# let the release counter carry the information. See `../bin/compute-next-tag.sh`.
 echoip_version: latest
 
 echoip_uid: ""
