@@ -31,12 +31,20 @@ provisioner:
         # Helper variables
         echoip_debug_service_enabled: false
 
+        # Names the helper containers that verify.yml starts, so that the
+        # scenarios never collide on a container name.
+        echoip_molecule_scenario: default
+
+        # The port on the host that echoip is published on. verify.yml reaches
+        # it there to check that publishing actually took effect.
+        echoip_molecule_http_bind_port: 8080
+
         # Variables for echoip
         echoip_uid: 1000
         echoip_gid: 1000
         echoip_hostname: localhost
         echoip_container_labels_traefik_enabled: false
-        echoip_container_http_host_bind_port: 8080
+        echoip_container_http_host_bind_port: "127.0.0.1:{{ echoip_molecule_http_bind_port }}"
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
