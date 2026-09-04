@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify echoip
+- name: Verify self-built echoip
   hosts: all
   become: true
   gather_facts: false
