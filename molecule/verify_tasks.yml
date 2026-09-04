@@ -346,7 +346,7 @@
     cmd: "docker rm --force {{ echoip_verify_control_container_name }}"
   changed_when: true
 
-- name: Show echoip verification summary
+- name: Show the echoip verification summary
   ansible.builtin.debug:
     msg:
       - "echoip systemd: {{ echoip_service.status.ActiveState }}"
