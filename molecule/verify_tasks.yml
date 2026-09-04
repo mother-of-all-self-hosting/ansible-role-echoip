@@ -6,11 +6,9 @@
 
 ---
 # The role is not included in this playbook, so its defaults are not in
-# scope. Only values that are literals in defaults/main.yml are read from
-# here - anything whose default is a Jinja expression over other defaults
-# would come back unevaluated, so those are established from the running
-# container further below instead.
-- name: Load the echoip role defaults
+# scope. Reading defaults/main.yml directly ties the version assertion
+# below.
+- name: Load the role defaults
   ansible.builtin.include_vars:
     file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
     name: echoip_defaults
