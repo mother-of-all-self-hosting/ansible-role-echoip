@@ -46,12 +46,12 @@
 - name: Inspect the echoip container
   ansible.builtin.command:
     cmd: "docker container inspect {{ echoip_defaults.echoip_identifier }}"
-  register: echoip_container_inspection
+  register: echoip_container_raw
   changed_when: false
 
 - name: Establish what the echoip container was created from
   ansible.builtin.set_fact:
-    echoip_container: "{{ (echoip_container_inspection.stdout | from_json)[0] }}"
+    echoip_container: "{{ (echoip_container_raw.stdout | from_json)[0] }}"
 
 - name: Establish the echoip container image and network
   ansible.builtin.set_fact:
