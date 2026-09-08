@@ -36,7 +36,7 @@
 - name: Retrieve the echoip systemd service log for debugging
   when: echoip_debug_service_enabled | bool
   ansible.builtin.command:
-    cmd: journalctl -xeu echoip.service
+    cmd: journalctl --no-pager --output=cat --unit=echoip.service
   changed_when: false
 
 # Everything the rest of this playbook needs about how the container was
