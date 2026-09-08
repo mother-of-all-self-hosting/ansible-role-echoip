@@ -117,14 +117,11 @@
 # community.docker collection and would fail the syntax check.
 - name: Start an unconfigured echoip container as a negative control
   ansible.builtin.command:
-    argv:
-      - docker
-      - run
-      - --detach
-      - --rm
-      - "--name={{ echoip_verify_control_container_name }}"
-      - "--network={{ echoip_verify_network }}"
-      - "{{ echoip_verify_image }}"
+    cmd: >-
+      docker run -d --rm
+      --name={{ echoip_verify_control_container_name }}
+      --network={{ echoip_verify_network }}
+      {{ echoip_verify_image }}
   changed_when: true
 
 - name: Ask the unconfigured echoip for the caller address (up to 60s)
