@@ -96,5 +96,23 @@
       }))
 
   tasks:
+    - name: Verify that echoip works
+      block:
     - name: Run the shared echoip verification
       ansible.builtin.include_tasks: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the echoip systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=echoip.service
+          register: actual_service_log
+          changed_when: false
+
+        - name: Show the echoip systemd service log
+          ansible.builtin.debug:
+            var: actual_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "echoip verification failed. The systemd service log is printed above."
