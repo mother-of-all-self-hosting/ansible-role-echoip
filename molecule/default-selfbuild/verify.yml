@@ -98,8 +98,8 @@
   tasks:
     - name: Verify that echoip works
       block:
-    - name: Run the shared echoip verification
-      ansible.builtin.include_tasks: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
+        - name: Run the shared echoip verification
+          ansible.builtin.include_tasks: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/molecule/verify_tasks.yml"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.
