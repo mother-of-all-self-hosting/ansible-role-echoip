@@ -106,12 +106,12 @@
         - name: Retrieve the echoip systemd service log
           ansible.builtin.command:
             cmd: journalctl --no-pager --output=cat --unit=echoip.service
-          register: actual_service_log
+          register: echoip_service_log
           changed_when: false
 
         - name: Show the echoip systemd service log
           ansible.builtin.debug:
-            var: actual_service_log.stdout_lines
+            var: echoip_service_log.stdout_lines
 
         - name: Fail because verification did not pass
           ansible.builtin.fail:
