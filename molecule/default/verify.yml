@@ -95,6 +95,9 @@
           "body": body.decode("utf-8", "replace").strip(),
       }))
 
+    echoip_verify_units:
+      - echoip.service
+
   tasks:
     - name: Verify that echoip works
       block:

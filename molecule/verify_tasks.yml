@@ -13,13 +13,14 @@
     file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
     name: echoip_defaults
 
-- name: Wait for the echoip systemd service to become active (up to 180s)
+- name: Wait for the echoip systemd services to become active (up to 180s each)
   ansible.builtin.systemd_service:
-    name: echoip.service
-  register: echoip_service
-  until: echoip_service.status.ActiveState == 'active'
+    name: "{{ item }}"
+  register: echoip_services
+  until: echoip_services.status.ActiveState == 'active'
   retries: 36
   delay: 5
+  loop: "{{ echoip_verify_units }}"
   # So that giving up is reported by the assertion below rather than as a
   # wall of systemd unit properties.
   failed_when: false
@@ -27,17 +28,20 @@
 # `Restart=always` in the systemd unit means that even a container which crashes
 # and gets restarted reads as active here, so this is a precondition rather than
 # a result.
-- name: Assert the echoip systemd service is active
+- name: Assert the echoip systemd services are active
   ansible.builtin.assert:
-    that: echoip_service.status.ActiveState == 'active'
-    fail_msg: "echoip.service is not active ({{ echoip_service.status.ActiveState }})"
-    success_msg: "echoip.service is active"
+    that: echoip_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+    fail_msg: >-
+      Not every service is active:
+      {{ dict(echoip_verify_units | zip(echoip_services.results | map(attribute='status.ActiveState'))) }}
+    success_msg: "Every systemd service is active"
 
-- name: Retrieve the echoip systemd service log for debugging
+- name: Retrieve the echoip systemd services log for debugging
   when: echoip_debug_service_enabled | bool
   ansible.builtin.command:
-    cmd: journalctl --no-pager --output=cat --unit=echoip.service
+    cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
   changed_when: false
+  loop: "{{ echoip_verify_units }}"
 
 # Everything the rest of this playbook needs about how the container was
 # actually created: the image, the network it joined, and the arguments
@@ -350,7 +354,7 @@
 - name: Show the echoip verification summary
   ansible.builtin.debug:
     msg:
-      - "echoip systemd: {{ echoip_service.status.ActiveState }}"
+      - "echoip systemd: {% for unit, state in echoip_verify_units | zip(echoip_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
       - "echoip image: {{ echoip_verify_image }}"
       - "echoip arguments: {{ echoip_container.Args | default([]) | join(' ') }}"
       - "Caller address echoed back: {{ (echoip_plain.stdout | from_json).body }}"
