@@ -55,7 +55,7 @@
 # template syntax that Ansible would also want to interpret.
 - name: Inspect the echoip container
   ansible.builtin.command:
-    cmd: "docker container inspect {{ echoip_defaults.echoip_identifier }}"
+    cmd: docker container inspect echoip
   register: echoip_container_raw
   changed_when: false
 
