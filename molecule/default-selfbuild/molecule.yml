@@ -30,6 +30,7 @@ provisioner:
       all:
         # Helper variables
         echoip_debug_service_enabled: false
+        echoip_restarts_check_enabled: true
 
         # Names the helper containers that verify.yml starts, so that the
         # scenarios never collide on a container name.

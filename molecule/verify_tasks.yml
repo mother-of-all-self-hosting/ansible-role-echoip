@@ -351,10 +351,50 @@
     cmd: "docker rm --force {{ echoip_verify_control_container_name }}"
   changed_when: true
 
+- name: Verify nothing was quietly restarting while all of that was being checked
+  when: "echoip_restarts_check_enabled | bool"
+  block:
+    # `Restart=always` means the unit reads `active` while it is crash-looping,
+    # so `active` on its own says very little. The window has to be watched with
+    # everything already answering.
+    - name: Sample the restart counters
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+      register: echoip_restarts_before
+      loop: "{{ echoip_verify_units }}"
+
+    # Comfortably longer than the unit's `RestartSec=30`, so a crash loop has to
+    # tick at least once inside the window.
+    - name: Watch the services for 45 seconds
+      ansible.builtin.pause:
+        seconds: 45
+
+    - name: Sample the restart counters again
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+      register: echoip_restarts_after
+      loop: "{{ echoip_verify_units }}"
+
+    - name: Assert no service restarted while it was up
+      ansible.builtin.assert:
+        that:
+          - echoip_restarts_after.results | map(attribute='status.NRestarts') | list == echoip_restarts_before.results | map(attribute='status.NRestarts') | list
+          - echoip_restarts_after.results | map(attribute='status.ActiveState') | unique | list == ['active']
+        fail_msg: >-
+          A service restarted while it was supposedly up, so `active` was hiding a crash loop.
+          Before:
+          {% for unit, restarts in echoip_verify_units | zip(echoip_restarts_before.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %},
+          after:
+          {% for unit, restarts in echoip_verify_units | zip(echoip_restarts_after.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %}
+        success_msg: >-
+          None of the services restarted over 45 seconds of watching (restarts so far:
+          {% for unit, restarts in echoip_verify_units | zip(echoip_restarts_after.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %})
+
 - name: Show the echoip verification summary
   ansible.builtin.debug:
     msg:
       - "echoip systemd: {% for unit, state in echoip_verify_units | zip(echoip_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
+      - "echoip restarts: {% for unit, restarts in echoip_verify_units | zip(echoip_restarts_after.results | map(attribute='status.NRestarts')) %}{{ restarts }} ({{ unit }}){% if not loop.last %}, {% endif %}{% endfor %}"
       - "echoip image: {{ echoip_verify_image }}"
       - "echoip arguments: {{ echoip_container.Args | default([]) | join(' ') }}"
       - "Caller address echoed back: {{ (echoip_plain.stdout | from_json).body }}"
