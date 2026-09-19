@@ -143,6 +143,13 @@ echoip_container_extra_arguments: "{{ echoip_container_extra_arguments_auto + ec
 echoip_container_extra_arguments_auto: []
 echoip_container_extra_arguments_custom: []
 
+# A list of extra arguments to pass to the process inside the container
+# Example: ['--SOME_ARGUMENT']
+echoip_process_extra_arguments: "{{ echoip_process_extra_arguments_auto + echoip_process_extra_arguments_custom }}"
+echoip_process_extra_arguments_auto:
+  - -H X-Real-IP
+echoip_process_extra_arguments_custom: []
+
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
 #
