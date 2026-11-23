@@ -57,8 +57,6 @@ echoip_hostname: "example.com"
 
 After adjusting the hostname, make sure to adjust your DNS records to point the domain to your server.
 
-**Note**: hosting echoip under a subpath (by configuring the `echoip_path_prefix` variable) does not seem to be possible due to echoip's technical limitations.
-
 ## Installing
 
 After configuring the playbook, run the installation command of your playbook as below:
